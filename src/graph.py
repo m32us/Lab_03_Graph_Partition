@@ -102,6 +102,39 @@ class Graph:
         return path
 
 
+    def DFS(self, vertex_ith:int):
+        """depth first search function, start from `vertex_ith`
+
+        Args:
+            vertex_ith (int): key of vertex in graph
+
+        Raises:
+            ValueError: can't find a vertex with given key
+
+        Returns:
+            list[int]: the path that DFS agent has gone through
+        """
+        vertex:Vertex = self.getVertex(vertex_ith)
+        if vertex is None:
+            message = 'Invalid vertex id, could not found vertex id `' + str(vertex_ith) + '` in Graph'
+            raise ValueError(get_log(message, log_type='ERROR'))
+
+        closed_set:list[int] = []
+        open_set:list[int] = [vertex.getId()]
+
+        while open_set:
+            cur_vertex:Vertex = self.getVertex(open_set.pop())
+            cur_vertex_id = cur_vertex.getId()
+
+            if cur_vertex_id not in closed_set:
+                closed_set.append(cur_vertex_id)
+                neighbors = [x.id for x in cur_vertex.getConnections()]
+
+                for neighbor in neighbors:
+                    if neighbor not in closed_set:
+                        open_set.append(neighbor)
+        return closed_set
+
 def save_path(path: list, file_name=None, mode='stdout'):
     """
     Module writing path to screen or to file.

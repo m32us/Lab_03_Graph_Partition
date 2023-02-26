@@ -18,5 +18,7 @@ g.addEdge(5, 2, 1)
 #         print("( %s , %s )" % (v.getId(), w.getId()))
 
 # test BFS and write mode
-path = g.BFS(0)
-save_path(path, mode='write_to_file', file_name='output.txt')
+path_bfs = g.BFS(0)
+path_dfs = g.DFS(0)
+save_path(path_bfs, mode='write_to_file', file_name='output_bfs.txt')
+save_path(path_dfs, mode='write_to_file', file_name='output_dfs.txt')

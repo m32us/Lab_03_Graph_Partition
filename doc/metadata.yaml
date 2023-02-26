@@ -1,0 +1,21 @@
+---
+title: "Lab 2: DFS - BFS"
+author:
+  - Nguyễn Bảo Long - 22C11065
+  - Trần Xuân Lộc - 22C11067
+date: "26/02/2023"
+subtitle: "Phương pháp toán cho Trí tuệ nhân tạo"
+lang: vn
+toc: true
+toc-own-page: true
+toc-depth: 3
+table-use-row-colors: false
+header-left: "\\thetitle"
+header-center: "\\hspace{0.5cm}"
+header-right: "Page \\thepage"
+footer-left: "\\hspace{0.5cm}"
+footer-center: "\\hspace{0.5cm}"
+footer-right: "\\hspace{0.5cm}"
+titlepage: true
+titlepage-background: "./backgrounds/background10.pdf"
+---
