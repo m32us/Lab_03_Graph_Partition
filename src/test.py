@@ -1,3 +1,5 @@
+from graph import *
+
 # main
 g = Graph()
 for i in range(6):
@@ -11,6 +13,10 @@ g.addEdge(3, 5, 3)
 g.addEdge(4, 0, 1)
 g.addEdge(5, 4, 8)
 g.addEdge(5, 2, 1)
-for v in g:
-    for w in v.getConnections():
-        print("( %s , %s )" % (v.getId(), w.getId()))
+# for v in g:
+#     for w in v.getConnections():
+#         print("( %s , %s )" % (v.getId(), w.getId()))
+
+# test BFS and write mode
+path = g.BFS(0)
+save_path(path, mode='write_to_file', file_name='output.txt')

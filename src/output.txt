@@ -1,0 +1,8 @@
+Beginning at vertex id: 0
+--> 0
+--> 1
+--> 5
+--> 2
+--> 4
+--> 3
+--> END

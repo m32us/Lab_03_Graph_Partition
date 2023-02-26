@@ -1,19 +1,67 @@
+from datetime import datetime
+
+
 class Vertex:
     def __init__(self, key):
-        self.id = key
-        self.connectedTo = {}
+        """
+        Module for initializing Vertex class.
+
+        :param key: identifying vertex id by key.
+        """
+        self.id = key  # assigning `id` attribute by the input `key`.
+        self.connectedTo = {}  # handling which vertex is connected with this vertex.
 
     def addNeighbor(self, nbr, weight=0):
+        """
+        Module adding neighbor for Vertex.
+        :param nbr: Vertex neighbor having connection with this vertex.
+        :param weight: the weight of edge between this vertex and vertex `nbr`.
+        :return:
+        """
         self.connectedTo[nbr] = weight
 
     def __str__(self):
+        """
+        Module for show the information of vertex.
+
+        :return: vertex id and its neighbors.
+        """
         return str(self.id) + " connectedTo: " + str([x.id for x in self.connectedTo])
 
     def getConnections(self):
+        """
+        Module getting all neighbors of this vertex.
+
+        :return: dict_keys() which saving all neighbors of this vertex.
+        """
         return self.connectedTo.keys()
 
     def getId(self):
+        """
+        Module getting the `id` of this vertex.
+
+        :return: `id` of this vertex.
+        """
         return self.id
 
     def getWeight(self, nbr):
+        """
+        Module getting weight of connection between this vertex and vertex `nbr`.
+
+        :param nbr: vertex has connection with this vertex.
+        :return: weight of edge.
+        """
         return self.connectedTo[nbr]
+
+
+def get_log(message, log_type='INFO'):
+    """
+    Module to return log message.
+
+    :param message:  message want to show.
+    :param log_type: type of log like INFO, ERROR, DEBUG, WARNING, ...
+    :return: log message with log type, time and message.
+    """
+    time = (datetime.now()).strftime("%d-%m-%Y %H:%M:%S")
+    log_mess = '[' + log_type.upper() + "] " + time + ' - ' + message.upper()
+    return log_mess
