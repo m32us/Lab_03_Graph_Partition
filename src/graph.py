@@ -1,5 +1,5 @@
 from vertex import *
-from tqdm import tqdm
+from support import *
 
 
 class Graph:
@@ -72,7 +72,7 @@ class Graph:
         """
         return iter(self.vertList.values())
 
-    def BFS(self, vertex_ith):
+    def BFS(self, vertex_ith: int):
         """
         Module applying Breadth First Search Algorithm.
 
@@ -101,8 +101,7 @@ class Graph:
                     queue.append(neighborId)
         return path
 
-
-    def DFS(self, vertex_ith:int):
+    def DFS(self, vertex_ith: int):
         """depth first search function, start from `vertex_ith`
 
         Args:
@@ -114,16 +113,16 @@ class Graph:
         Returns:
             list[int]: the path that DFS agent has gone through
         """
-        vertex:Vertex = self.getVertex(vertex_ith)
+        vertex: Vertex = self.getVertex(vertex_ith)
         if vertex is None:
             message = 'Invalid vertex id, could not found vertex id `' + str(vertex_ith) + '` in Graph'
             raise ValueError(get_log(message, log_type='ERROR'))
 
-        closed_set:list[int] = []
-        open_set:list[int] = [vertex.getId()]
+        closed_set: list[int] = []
+        open_set: list[int] = [vertex.getId()]
 
         while open_set:
-            cur_vertex:Vertex = self.getVertex(open_set.pop())
+            cur_vertex: Vertex = self.getVertex(open_set.pop())
             cur_vertex_id = cur_vertex.getId()
 
             if cur_vertex_id not in closed_set:
@@ -134,38 +133,3 @@ class Graph:
                     if neighbor not in closed_set:
                         open_set.append(neighbor)
         return closed_set
-
-def save_path(path: list, file_name=None, mode='stdout'):
-    """
-    Module writing path to screen or to file.
-
-    :param path: path of searching result from BFS or DFS or other with the same structure.
-    :param file_name: name of file to save result with `mode='write_to_file'`.
-    :param mode: mode to write result to file (`mode='write_to_file'`) or to screen `mode='stdout'`.
-    :return: Notification if save to file or warning empty if not exist path.
-    """
-    result = ['Beginning at vertex id: ' + str(path[0])]
-    if not path:
-        message = 'path is empty'
-        print(get_log(message, log_type='WARNING'))
-        return
-    for vertex_id in path:  # collecting path data from `path`
-        line = str(vertex_id)
-        result.append(line)
-    if mode.lower() == 'stdout':  # redirecting result to stdout of system
-        print(get_log('Viewing mode: ' + mode.upper()))
-        for line in result:
-            print(get_log(line))
-    elif mode.lower() == 'write_to_file':  # write result to file
-        if not file_name:
-            message = get_log('name of file is empty!', log_type='ERROR')
-            raise ValueError(message)
-        print(get_log('Viewing mode: ' + mode.upper()))
-        print(get_log('WRITING RESULT TO FILE: ' + file_name))
-        write_data = [result[0]]+['\n--> ' + line for line in result[1:]+['END']]
-        with open(file_name, 'w') as f:
-            for idx, line in zip(tqdm(range(len(write_data)), desc="Saving progress"), write_data):
-                f.write(line)
-            f.close()
-        print(get_log('FINISHED SAVING DATA'))
-

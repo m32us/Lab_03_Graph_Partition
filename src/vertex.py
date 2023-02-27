@@ -1,4 +1,4 @@
-from datetime import datetime
+from support import *
 
 
 class Vertex:
@@ -52,16 +52,3 @@ class Vertex:
         :return: weight of edge.
         """
         return self.connectedTo[nbr]
-
-
-def get_log(message, log_type='INFO'):
-    """
-    Module to return log message.
-
-    :param message:  message want to show.
-    :param log_type: type of log like INFO, ERROR, DEBUG, WARNING, ...
-    :return: log message with log type, time and message.
-    """
-    time = (datetime.now()).strftime("%d-%m-%Y %H:%M:%S")
-    log_mess = '[' + log_type.upper() + "] " + time + ' - ' + message.upper()
-    return log_mess
