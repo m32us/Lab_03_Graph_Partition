@@ -18,4 +18,13 @@ footer-center: "\\hspace{0.5cm}"
 footer-right: "\\hspace{0.5cm}"
 titlepage: true
 titlepage-background: "./backgrounds/background10.pdf"
+header-includes: |
+    \usepackage{float}
+    \let\origfigure\figure
+    \let\endorigfigure\endfigure
+    \renewenvironment{figure}[1][2] {
+        \expandafter\origfigure\expandafter[H]
+    } {
+        \endorigfigure
+    }
 ---

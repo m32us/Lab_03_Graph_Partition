@@ -29,7 +29,7 @@ Viết hàm và tài liệu cho thuật toán `BFS`|Xuân Lộc
 
 Trong phần này, nhóm sẽ trình bày cách tổ chức lưu trữ dữ liệu đồ thị vào trong lớp `Graph` bao gồm các thành phần lưu trữ dữ liệu và mô tả các hàm thực thi phục vụ cho lớp. Tệp `graph.py` lưu trữ thông tin cấu hình chi tiết và mã nguồn.
 
-### Cấu trúc dữ liệu đồ thị bao gồm:
+### Cấu trúc dữ liệu đồ thị
 
 - `self.vertList`: Biến có kiểu dữ liệu từ điển, chứa danh sách đỉnh của đồ thị. Mỗi phần tử trong từ điển có khóa là định danh của đỉnh (`id`) và giá trị là một đối tượng có kiểu dữ liệu `Vertex`.
 - `self.numVertices`: Biến có kiểu dữ liệu là số nguyên, xác định số đỉnh của đồ thị.
@@ -159,6 +159,37 @@ Phần này sẽ tập trung mô tả các hàm hỗ trợ ghi dữ liệu và h
 
 - Ý tưởng thuật toán: Bắt đầu từ đỉnh xuất phát đi xa nhất có thể, đến khi không thể đi được nữa thì quay lui (backtracking). Chính vì vậy, có thể cài đặt thuật toán này bằng đệ quy hoặc sử dụng một ngăn xếp.
 
+- Thuật toán được cài đặt như sau:
+
+    ```python
+    def DFS(self, vertex_ith: int):
+        """depth first search function, start from `vertex_ith`
+        Args: vertex_ith (int): key of vertex in graph
+        Raises: ValueError: can't find a vertex with given key
+        Returns: list[int]: the path that DFS agent has gone through
+        """
+        vertex: Vertex = self.getVertex(vertex_ith)
+        if vertex is None:
+            message = 'Invalid vertex id, could not found vertex id `' + str(vertex_ith) + '` in Graph'
+            raise ValueError(get_log(message, log_type='ERROR'))
+
+        closed_set: list[int] = []
+        open_set: list[int] = [vertex.getId()]
+
+        while open_set:
+            cur_vertex: Vertex = self.getVertex(open_set.pop())
+            cur_vertex_id = cur_vertex.getId()
+
+            if cur_vertex_id not in closed_set:
+                closed_set.append(cur_vertex_id)
+                neighbors = [x.id for x in cur_vertex.getConnections()]
+
+                for neighbor in neighbors:
+                    if neighbor not in closed_set:
+                        open_set.append(neighbor)
+        return closed_set
+    ```
+
 - Minh họa thuật toán:
     - Đồ thị:
 
@@ -179,13 +210,16 @@ Phần này sẽ tập trung mô tả các hàm hỗ trợ ghi dữ liệu và h
 
     - Minh họa bằng cây tìm kiếm:
 
-        ![Minh họa quá trình duyệt đồ thị bằng cây tìm kiếm. Thứ tự duyệt được thể hiện trong hình tròn màu xanh.](./img/tree_dfs.png)
+        ![Minh họa thuật toán DFS bằng cây tìm kiếm. Thứ tự duyệt được thể hiện trong hình tròn màu xanh.](./img/tree_dfs.png){height=60%}
 
 ### Thuật toán BFS
+
 - Ý tưởng thuật toán: Bắt đầu từ đỉnh xuất phát đi rộng nhất có thể, đến khi không thể đi được nữa thì quay lại đi xuống 1 bậc đồ thị để tiếp tục quá trình tương tự. Do đó, ta có thể cài đặt thuật toán này bằng 1 hàng đợi và 1 mảng đánh dấu đã duyệt là đủ.
+
 - Cấu hình thuật toán được thể hiện ở bên dưới.
-```
-def BFS(self, vertex_ith: int):
+
+    ```python
+    def BFS(self, vertex_ith: int):
         """
         Module applying Breadth First Search Algorithm.
 
@@ -235,7 +269,7 @@ def BFS(self, vertex_ith: int):
                     visited[neighborId] = True
                     queue.append(neighborId)
         return path
-```
+    ```
 
 - Minh họa thuật toán:
     - Đồ thị:
@@ -257,7 +291,7 @@ def BFS(self, vertex_ith: int):
 
     - Minh họa bằng cây tìm kiếm:
 
-        ![Minh họa quá trình duyệt đồ thị bằng thuật toán duyệt theo chiều rộng với cây tìm kiếm. Thứ tự duyệt được thể hiện trong hình tròn màu xanh.](./img/tree_bfs.png)
+        ![Minh họa thuật toán BFS bằng thuật toán duyệt theo chiều rộng với cây tìm kiếm. Thứ tự duyệt được thể hiện trong hình tròn màu xanh.](./img/tree_bfs.png){height=60%}
 
 \newpage
 
