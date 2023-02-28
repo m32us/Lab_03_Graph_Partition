@@ -5,8 +5,8 @@ title: "\\thetitle"
 # Thông tin chung
 
 - Thành viên:
+    - Trần Xuân Lộc - 22C11064
     - Nguyễn Bảo Long - 22C11065
-    - Trần Xuân Lộc - 22C11067
 
 - Bảng phân công công việc:
 
