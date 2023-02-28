@@ -68,4 +68,4 @@ pip install datetime
 ## About Us
 Our project includes two contributors:
 - Tran Xuan Loc - 22C11064 - 22C11064@student.hcmus.edu.vn
-- Nguyen Bao Long - 22C11065 - 22C11067@student.hcmus.edu.vn
+- Nguyen Bao Long - 22C11065 - 22C11065@student.hcmus.edu.vn
