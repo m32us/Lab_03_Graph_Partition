@@ -1,4 +1,4 @@
-# Lab_02_BFS_DFS
+# Lab 02: IMPLEMENT BREADTH FIRST SEARCH (BFS) AND DEPTH FIRST SEARCH (DFS).
 
 In this project, we implement Breadth First Search (BFS) and Depth Frist Search (DFS) based on the given structure of Graph.
 	
