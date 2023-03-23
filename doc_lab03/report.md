@@ -412,9 +412,309 @@ def pa_bfs(graph, vertex_ith: int, threshold: int):
 
 ### Thuật toán Kernighan-Lin
 
+Thuật toán Kernighan-Lin là một thuật tóa phân hoạch đồ thị dựa trên heuristic được đề xuất vào năm 1970. Nó nhận đầu vào là một đồ thị có trọng số $G = (V, E, w(.))$, trong đó là $w(.)$ là hàm trọng số cạnh, $|v| = 2n$ và một lưỡng phân hoạch khởi tạo (initial bi-partition) $(V_1, V_2)$ của tập hợp các cạnh, trong đó $|V_1| = |V_2| = n$. Mục tiêu thuật toán là tạo ra một phân hoạch mới $(V_1', V_2')$ mà $|V'_1| = |V'_2| = n$ mà tổng chi phí phân hoạch nhỏ hơn hoặc bằng chi phí trước đó.
+
+Thuật toán Kernighan-Lin là một thuật toán phân hoạch cân bằng (balanced partitioning algorithm), tức là hai thành phần được tạo bởi thuật toán có cùng số lượng đỉnh (trong trường hợp tổng quá, có thể dùng thuật ngữ xấp xỉ bằng).
+
+Thuật toán hoán đổi một cách tuần tự các cặp đỉnh cho đến khi đạt được tối ưu phân hoạch cục bộ, độ phức tạp thời gian của thuật toán là $O(N^3)$, trong đó $N$ là số lượng đỉnh trong đồ thị $G$. Một trong những thuật toán kế thừa của thuật toán này là Fiduccia-Mattheyeses algorithm, cải thiện thời gian thực thi trong $O(|E|)$ và hoạt động tốt trên siêu đồ thị (hypergraph).
+
+Mã giả của thuật toán Kernighan-Lin như sau:
+
+```
+Compute T = cost(A,B) for initial A, 
+    B Repeat
+        Compute costs D(n) for all n in N
+        Unmark all nodes in N
+        While there are unmarked nodes
+            Find an unmarked pair (a,b) maximizing gain(a,b)
+            Mark a and b (but do not swap them) Update D(n) for all unmarked n,
+              as though a and b had been swapped
+        Endwhile
+
+        Pick m maximizing Gain = Sk=1 to m gain(k) 
+        If Gain > 0 then … it is worth 
+        swapping
+            Update newA = A - { a1,…,am } U { b1,…,bm }
+            Update newB = B - { b1,…,bm } U { a1,…,am 
+                } Update T = T - Gain
+        endif 
+    Until Gain <= 0
+```
+
+Cài đặt thuật toán bằng Python
+
+Khởi tạo hai thành phần phân hoạch có kích thước bằng nhau
+
+```py
+# Partition the vertices into two equal-sized groups A and B.
+half = graph.numVertices // 2
+for ind in range(half):
+    graph.vertList[ind].partition_label = 'A'
+    graph.vertList[ind + half].partition_label = 'B'
+```
+
+Tính toán `D_values` cho một lần duyệt
+
+```py
+group_a = [v.id for k, v in graph.vertList.items()
+                   if v.partition_label == "A"]
+group_b = [v.id for k, v in graph.vertList.items()
+            if v.partition_label == "B"]
+
+D_values = {}
+
+for idx, vertex in graph.vertList.items():
+    for neighbor in vertex.connectedTo:
+        if vertex.partition_label == neighbor.partition_label:
+            vertex.internal_cost += vertex.getWeight(neighbor)
+        else:
+            vertex.external_cost -= vertex.getWeight(neighbor)
+
+    D_values.update(
+        {idx: graph.vertList[idx].external_cost + graph.vertList[idx].internal_cost})
+```
+
+Tính toán độ lợi cho tất cả các hoán vị đỉnh có thể có giữa hai thành phần phân hoạch.
+
+```py
+# Compute the gains for all possible vertex swaps between groups A and B.
+gains = []
+for a in group_a:
+    for b in group_b:
+        c_ab = graph.vertList[a].getWeight(graph.vertList[b])
+        gain = D_values[a] + D_values[b] - (2 * c_ab)
+        gains.append([[a, b], gain])
+```
+
+Sắp xếp và lấy ra độ lợi lớn nhất.
+
+```py
+# Sort the gains in descending order and get the maximum gain.
+gains = sorted(gains, key=lambda x: x[1], reverse=True)
+max_gain = gains[0][1]
+
+if max_gain <= 0:
+    break
+```
+
+Lấy ra cặp đỉnh với độ lợi lớn nhất và hoán vị nhãn phân hoạch của chúng.
+```py
+# Get the pair of vertices with the maximum gain and swap their partition labels.
+pair = gains[0][0]
+group_a.remove(pair[0])
+group_b.remove(pair[1])
+
+graph.vertList[pair[0]].partition_label = "B"
+graph.vertList[pair[1]].partition_label = "A"
+```
+
+Cập nhật độ lợi cho các đỉnh trong phân hoạch.
+
+```py
+# Update the D values of the vertices in groups A and B.
+for x in group_a:
+    c_xa = graph.vertList[x].getWeight(graph.vertList[pair[0]])
+    c_xb = graph.vertList[x].getWeight(graph.vertList[pair[1]])
+    D_values[x] += 2 * c_xa - 2 * c_xb
+
+for y in group_b:
+    c_ya = graph.vertList[y].getWeight(graph.vertList[pair[0]])
+    c_yb = graph.vertList[y].getWeight(graph.vertList[pair[1]])
+    D_values[x] += 2 * c_ya - 2 * c_yb
+
+# Update the total gain.
+total_gain += max_gain
+```
+
+Toàn bộ mã nguồn thuật toán
+
+```py
+def pa_kl(graph):
+    """Algorithm description:
+    The KL algorithm is a heuristic algorithm for partitioning a graph into two disjoint sets of vertices with roughly equal sizes, 
+    while minimizing the total weight of the edges between the two sets. The algorithm works by iteratively swapping vertices 
+    between the two sets in a way that reduces the total weight of the cut.
+
+    The algorithm starts by dividing the vertices into two sets, A and B, with roughly equal sizes. 
+    Then, it iteratively performs the following steps:
+        Step 1: Compute the net gain for moving each vertex from set A to set B, and vice versa. 
+        The net gain is defined as the difference between the sum of the weights of the edges 
+        that connect the vertex to its current set and the sum of the weights of the edges 
+        that connect the vertex to the other set.
+
+        Step 2: Select the pair of vertices with the highest net gain, one from set A and one from set B, and swap them.
+
+        Step 3: Update the net gains for the affected vertices, and repeat the process until no more swaps can be made.
+
+    The algorithm terminates when no more swaps can be made that improve the total weight of the cut. 
+    The final partitioning is the one that results in the minimum cut.
+
+    References: 
+    [1] Graph Partitioning, https://patterns.eecs.berkeley.edu/?page_id=571#1_BFS
+    """
+    # Partition the vertices into two equal-sized groups A and B.
+    half = graph.numVertices // 2
+    for ind in range(half):
+        graph.vertList[ind].partition_label = 'A'
+        graph.vertList[ind + half].partition_label = 'B'
+
+    total_gain = 0
+
+    # Keep track of the total gain in each iteration.
+    for _ in range(half):
+        # Get the vertices in groups A and B and their D values.
+        group_a = [v.id for k, v in graph.vertList.items()
+                   if v.partition_label == "A"]
+        group_b = [v.id for k, v in graph.vertList.items()
+                   if v.partition_label == "B"]
+
+        D_values = {}
+
+        for idx, vertex in graph.vertList.items():
+            for neighbor in vertex.connectedTo:
+                if vertex.partition_label == neighbor.partition_label:
+                    vertex.internal_cost += vertex.getWeight(neighbor)
+                else:
+                    vertex.external_cost -= vertex.getWeight(neighbor)
+
+            D_values.update(
+                {idx: graph.vertList[idx].external_cost + graph.vertList[idx].internal_cost})
+
+        # Compute the gains for all possible vertex swaps between groups A and B.
+        gains = []
+        for a in group_a:
+            for b in group_b:
+                c_ab = graph.vertList[a].getWeight(graph.vertList[b])
+                gain = D_values[a] + D_values[b] - (2 * c_ab)
+                gains.append([[a, b], gain])
+
+        # Sort the gains in descending order and get the maximum gain.
+        gains = sorted(gains, key=lambda x: x[1], reverse=True)
+        max_gain = gains[0][1]
+
+        if max_gain <= 0:
+            break
+
+        # Get the pair of vertices with the maximum gain and swap their partition labels.
+        pair = gains[0][0]
+        group_a.remove(pair[0])
+        group_b.remove(pair[1])
+
+        graph.vertList[pair[0]].partition_label = "B"
+        graph.vertList[pair[1]].partition_label = "A"
+
+        # Update the D values of the vertices in groups A and B.
+        for x in group_a:
+            c_xa = graph.vertList[x].getWeight(graph.vertList[pair[0]])
+            c_xb = graph.vertList[x].getWeight(graph.vertList[pair[1]])
+            D_values[x] += 2 * c_xa - 2 * c_xb
+
+        for y in group_b:
+            c_ya = graph.vertList[y].getWeight(graph.vertList[pair[0]])
+            c_yb = graph.vertList[y].getWeight(graph.vertList[pair[1]])
+            D_values[x] += 2 * c_ya - 2 * c_yb
+
+        # Update the total gain.
+        total_gain += max_gain
+
+        # break
+
+    # Get the cutset size and the vertex IDs in groups A and B.
+    cutset_size = graph.compute_partition_cost()
+    group_a = [v.id for k, v in graph.vertList.items()
+               if v.partition_label == "A"]
+    group_b = [v.id for k, v in graph.vertList.items()
+               if v.partition_label == "B"]
+
+    # Print the results
+    logging.info("Cut size: {}".format(cutset_size))
+    logging.info("Group A vertices: {}".format(group_a))
+    logging.info("Group B vertices: {}".format(group_b))
+
+    return cutset_size, group_a, group_b
+```
+
 ### Thuật toán Fiduccia-Mattheyses Partitioning
 
 ### Thuật toán Spectral Bisection
+
+Lý thuyết spectral bisection được phát triển vào năm 1970 bởi Fiedler. Nó dựa trên tính toán vector trị riêng của ma trận Laplacian matrix của đồ thị. Với một đồ thị $G$, chúng ta định nghĩa ma trận Laplacian của nó $L(G)$ như sau:
+
+- Laplacian matrix $L(G)$ của đồ thị $G = (V,E)$ là một ma trận đối xứng, kích thước $|V| \times |V|$ với một dòng và một cột cho mỗi đỉnh, và mỗi vị trí trong ma trận được định nghĩa bởi:
+
+    - $L(G)(i, i)$ = bậc của đỉnh $i$
+
+    - $L(G)(i, j) = -1$ nếu $i \ne j$ và tồn tại cạnh $(i, j)$
+    
+    - $L(G)(i, j) = 0$, nếu trong trường hợp khác.
+
+Thuật toán Spectral Bisection
+
+- Bước 1: Xây dựng ma trận Laplacian matrix $L(G)$ cho đồ thị đầu vào $G = (V,E)$
+
+- Bước 2: Tính toán vector riêng $v_2$ tương ứng với trị riêng thứ hai $\lambda_2$ của ma trận Laplacian matrix $L(G)$
+
+- Bước 3: Với mỗi đỉnh $i \in V$:
+    - nếu $v_2[i] < 0$ đặt đỉnh này vào phân hoạch A
+
+    - ngược lại thì đặt đỉnh này phân hoạch B.
+
+Cài đặt thuật toán bằng Python
+
+```py
+def pa_sb(graph):
+    """Algorithm description:
+
+    The Spectral Bisection algorithm is a graph partitioning algorithm that is based on the eigenvalues and eigenvectors of the graph Laplacian matrix. 
+    The algorithm works by iteratively bisecting the graph into two disjoint sets of vertices with roughly equal sizes, while minimizing 
+    the total weight of the edges between the two sets.
+
+    The algorithm starts by computing the eigenvectors corresponding to the smallest eigenvalues of the graph Laplacian matrix. 
+    The eigenvectors are then used to partition the graph into two sets of vertices, A and B, by assigning each vertex to 
+    the set that corresponds to the sign of the corresponding eigenvector component. This initial partitioning is not guaranteed
+    to be balanced, but is usually close to it.
+
+    Then, the algorithm iteratively improves the partitioning by performing the following steps:
+        Step 1: Compute the cut size of the current partitioning.
+        Step 2: Compute the eigenvectors corresponding to the second-smallest eigenvalues of the graph Laplacian matrix.
+        Step 3: Compute the projection of the current partitioning onto the space spanned by the eigenvectors corresponding 
+        to the smallest and second-smallest eigenvalues. This projection is used to determine a new partitioning by assigning
+        each vertex to the set that corresponds to the sign of the projection.
+        Step 4: Compute the cut size of the new partitioning, and select it if it has a smaller cut size than the current partitioning. 
+        Otherwise, discard the new partitioning and continue with the current one.
+
+    The algorithm terminates when no more improvements can be made, or when a desired balance ratio between the two sets is achieved. 
+    The final partitioning is the one that results in the minimum cut.
+
+    References: 
+    [1] Graph Partitioning, https://patterns.eecs.berkeley.edu/?page_id=571#1_BFS
+    """
+    laplacian_matrix = graph.compute_laplacian_matrix()
+    logging.info('Computing the eigenvectors and eigenvalues')
+    eigenvalues, eigenvectors = np.linalg.eigh(laplacian_matrix)
+
+    # Index of the second eigenvalue
+    index_fnzev = np.argsort(eigenvalues)[1]
+    logging.info('Eigenvector for #{} eigenvalue ({}): '.format(
+        index_fnzev, eigenvalues[index_fnzev]), eigenvectors[:, index_fnzev])
+
+    # Partition on the sign of the eigenvector's coordinates
+    partition = [val >= 0 for val in eigenvectors[:, index_fnzev]]
+
+    # Compute the edges in between
+    logging.info('Compute the edges in between two groups.')
+    a = [idx for (idx, group_label) in enumerate(partition) if group_label]
+    b = [idx for (idx, group_label) in enumerate(partition) if not group_label]
+
+    group_a = [v.id for k, v in graph.vertList.items()
+               if v.id in a]
+    group_b = [v.id for k, v in graph.vertList.items()
+               if v.id in b]
+
+    logging.info("Group A vertices: {}".format(group_a))
+    logging.info("Group B vertices: {}".format(group_b))
+    return group_a, group_b
+```
 
 ### Thuật toán $k$-way partitioning
 
