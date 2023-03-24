@@ -1,5 +1,6 @@
-from support import get_log
+import logging
 import numpy as np
+
 
 # Partitioning Algorithms
 
@@ -74,6 +75,9 @@ def pa_bfs(graph, vertex_ith: int, threshold: int):
                     L1.add(neighborId)
                 queue.append(neighborId)
         level += 1
+
+    logging.info("Group A vertices: {}".format(L1))
+    logging.info("Group B vertices: {}".format(L2))
     return L1, L2
 
 
@@ -176,9 +180,9 @@ def pa_kl(graph):
                if v.partition_label == "B"]
 
     # Print the results
-    print("Cut size: {}".format(cutset_size))
-    print("Group A vertices: {}".format(group_a))
-    print("Group B vertices: {}".format(group_b))
+    logging.info("Cut size: {}".format(cutset_size))
+    logging.info("Group A vertices: {}".format(group_a))
+    logging.info("Group B vertices: {}".format(group_b))
 
     return cutset_size, group_a, group_b
 
@@ -294,9 +298,9 @@ def pa_fm(graph):
                if v.partition_label == "B"]
 
     # Print the results
-    print("Cut size: {}".format(cutset_size))
-    print("Group A vertices: {}".format(group_a))
-    print("Group B vertices: {}".format(group_b))
+    logging.info("Cut size: {}".format(cutset_size))
+    logging.info("Group A vertices: {}".format(group_a))
+    logging.info("Group B vertices: {}".format(group_b))
 
     return cutset_size, group_a, group_b
 
@@ -340,19 +344,19 @@ def pa_sb(graph):
     [1] Graph Partitioning, https://patterns.eecs.berkeley.edu/?page_id=571#1_BFS
     """
     laplacian_matrix = graph.compute_laplacian_matrix()
-    print('Computing the eigenvectors and eigenvalues')
+    logging.info('Computing the eigenvectors and eigenvalues')
     eigenvalues, eigenvectors = np.linalg.eigh(laplacian_matrix)
 
     # Index of the second eigenvalue
     index_fnzev = np.argsort(eigenvalues)[1]
-    print('Eigenvector for #{} eigenvalue ({}): '.format(
+    logging.info('Eigenvector for #{} eigenvalue ({}): '.format(
         index_fnzev, eigenvalues[index_fnzev]), eigenvectors[:, index_fnzev])
 
     # Partition on the sign of the eigenvector's coordinates
     partition = [val >= 0 for val in eigenvectors[:, index_fnzev]]
 
     # Compute the edges in between
-    print(partition)
+    logging.info('Compute the edges in between two groups.')
     a = [idx for (idx, group_label) in enumerate(partition) if group_label]
     b = [idx for (idx, group_label) in enumerate(partition) if not group_label]
 
@@ -361,8 +365,8 @@ def pa_sb(graph):
     group_b = [v.id for k, v in graph.vertList.items()
                if v.id in b]
 
-    print("Group A vertices: {}".format(group_a))
-    print("Group B vertices: {}".format(group_b))
+    logging.info("Group A vertices: {}".format(group_a))
+    logging.info("Group B vertices: {}".format(group_b))
     return group_a, group_b
 
 
