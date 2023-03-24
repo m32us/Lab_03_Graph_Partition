@@ -1,4 +1,4 @@
-# Lab 02: IMPLEMENT SOME GRAPH PARTITION ALGORITHMS.
+# Lab 03: IMPLEMENT SOME GRAPH PARTITION ALGORITHMS.
 
 Graph partitioning is the process of dividing a graph into multiple subgraphs or partitions, such that each subgraph is connected and has a certain desirable property, such as balanced size or minimal cut size. Although it is a challenging problem, finding a partition that makes graph analysis easier has applications in scientific computing. In this project, we provide a Python programming language implementation for a few well-known graph partitioning techniques.
 
