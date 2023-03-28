@@ -413,7 +413,6 @@ def pa_scc_kl(graph):
         partition.setdefault('partition_1', []).append(partition_1)
         partition.setdefault('partition_2', []).append(partition_2)
 
-    print(partition)
     return partition
 
 
