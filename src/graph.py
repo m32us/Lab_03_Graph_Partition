@@ -147,6 +147,56 @@ class Graph:
                         open_set.append(neighbor)
         return closed_set
 
+    def reversing(self, ):
+        rg = Graph()
+        for i in range(self.numVertices):
+            rg.addVertex(i)
+
+        for vertex_idx, vertex in self.vertList.items():
+            for neighbor in vertex.connectedTo:
+                rg.addEdge(neighbor.getId(), vertex.getId(),
+                           neighbor.getWeight(vertex))
+
+        return rg
+
+    def find_strongly_connected_components(self):
+        """
+        Kosaraju algorithm
+        """
+        # Perform a Depth First Search (DFS) on the original graph 
+        # and keep track of the order in which the nodes are visited.
+        dfspath = self.DFS()
+
+        # Reverse the directions of all edges in the graph to obtain a new graph.
+        rg = self.reversing()
+
+        # Perform a DFS on the new graph, visiting the nodes in the reverse order obtained in step 1. 
+        # As you perform the DFS, mark each node as belonging to the same SCC.
+        closed_set: list[int] = []
+        scc_set = []
+
+        for idx in range(rg.numVertices):
+            if idx not in closed_set:
+                # open_set: list[int] = [idx]
+                scc = []
+
+                while dfspath:
+                    cur_vertex: Vertex = rg.getVertex(dfspath.pop())
+                    cur_vertex_id = cur_vertex.getId()
+
+                    if cur_vertex_id not in closed_set:
+                        closed_set.append(cur_vertex_id)
+                        scc.append(cur_vertex_id)
+
+                        neighbors = [x.id for x in cur_vertex.getConnections()]
+
+                        for neighbor in neighbors:
+                            if neighbor not in closed_set:
+                                dfspath.append(neighbor)
+                scc_set.append(scc)
+
+        return scc_set
+
     def compute_partition_cost(self):
         """Computing partiion cost function
         Returns:

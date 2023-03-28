@@ -1,6 +1,8 @@
 import logging
 import numpy as np
 
+from graph import Graph
+
 
 # Partitioning Algorithms
 
@@ -106,6 +108,7 @@ def pa_kl(graph):
     [1] Graph Partitioning, https://patterns.eecs.berkeley.edu/?page_id=571#1_BFS
     """
     # Partition the vertices into two equal-sized groups A and B.
+
     half = graph.numVertices // 2
     for ind in range(half):
         graph.vertList[ind].partition_label = 'A'
@@ -374,6 +377,45 @@ def pa_sb(graph):
 The Spectral Bisection algorithm is a powerful graph partitioning algorithm that can produce high-quality partitions for a wide range of graph types. 
 However, it can be computationally expensive, especially for large graphs, due to the need to compute the eigenvalues and eigenvectors of the Laplacian matrix.
 """
+#########################################################################################################
+def pa_scc_kl(graph):
+    # Identify the connected components in the graph using DFS
+    scc_lst = graph.find_strongly_connected_components()
+
+    # Compute the weight of each component
+    weights = [abs(len(c) - graph.numVertices/2) for c in scc_lst]
+
+    # Sort the components by weight in descending order
+    sorted_scc_lst = [c for _,c in sorted(zip(weights, scc_lst), reverse=True)]
+
+    # Initialize the partition as an empty list
+    partition = {}
+
+    # Iterate over each connected component and attempt to partition it
+    for component in sorted_scc_lst:
+        print(component)
+        subgraph = Graph()
+    
+        for vertex in component:
+            subgraph.addVertex(vertex)
+            for neighbor in graph.vertList[vertex].connectedTo:
+                if neighbor.getId() not in component:
+                    subgraph.addVertex(neighbor.getId())
+                    subgraph.addEdge(vertex, neighbor.getId(), graph.vertList[vertex].getWeight(neighbor))
+
+        
+        # Partition the subgraph using a heuristic algorithm
+        # such as Kernighan-Lin or Fiduccia-Mattheyses
+        # Here we'll use Kernighan-Lin
+        cutset_size, partition_1, partition_2 = pa_kl(subgraph)
+
+        # Add the partitions to the overall partition
+        partition.setdefault('partition_1', []).append(partition_1)
+        partition.setdefault('partition_2', []).append(partition_2)
+
+    return partition
+
+
 
 #########################################################################################################
 # k-way partitioning
