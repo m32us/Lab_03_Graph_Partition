@@ -163,6 +163,11 @@ Spectral Bisection
 python main.py --number_nodes 20 --edge_prob 0.5 --algorithm sb
 ```
 
+Kerninghan-Lin (KL) algorithm optimized by connected components
+
+```
+python main.py --number_nodes 20 --edge_prob 0.5 --algorithm scc_kl
+```
 
 ## References
 
@@ -174,7 +179,7 @@ python main.py --number_nodes 20 --edge_prob 0.5 --algorithm sb
 
 ## About us
 
-Our project includes two contributors:
+Our project includes three contributors:
 - Tran Xuan Loc - 22C11064 - 22C11064@student.hcmus.edu.vn (For project 02 & 03, Thanks for his based coding)
 - Nguyen Bao Long - 22C11065 - 22C11065@student.hcmus.edu.vn (For project 02, Thanks for his based coding)
 - Le Nhut Nam - 22C11067 - 22C11065@student.hcmus.edu.vn (For project 03, Thanks for his based coding)
