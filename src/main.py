@@ -3,7 +3,7 @@ from random import random, randint
 from itertools import product, combinations
 
 from graph import *
-from algorithms import pa_bfs, pa_kl, pa_fm, pa_sb
+from algorithms import pa_bfs, pa_kl, pa_fm, pa_sb, pa_scc_kl
 
 set_logger('logs/')
 
@@ -59,5 +59,7 @@ if __name__ == '__main__':
         cutset_size, group_a, group_b = pa_fm(g)
     elif args.algorithm == 'sb':
         group_a, group_b = pa_sb(g)
+    elif args.algorithm == 'scc_kl':
+        group_a, group_b = pa_scc_kl(g)
     else:
         logging.warning('Algorithm not supported')

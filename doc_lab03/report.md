@@ -319,7 +319,7 @@ Với một bài toán phân hoạch cân bằng $(k, v)$m mục tiêu là phân
 
 Trong báo cáo kỹ thuật này, chúng em xem xét bài toán phân hoạch đồ thị thành hai thành phần. Chúng em thực hiện cài đặt các thuật toán như sau:
 
-- BFS
+- Phân hoạch dựa trên BFS
 
 - Kernighan-Lin Algorithm
 
@@ -327,7 +327,7 @@ Trong báo cáo kỹ thuật này, chúng em xem xét bài toán phân hoạch �
 
 - Spectral Bisection
 
-- $k$-way partitioning
+- Tối ưu thuật toán phân hoạch đồ thị bằng thành phần liên thông
 
 ### Thuật toán phân hoạch dựa trên BFS
 
@@ -716,7 +716,113 @@ def pa_sb(graph):
     return group_a, group_b
 ```
 
-### Thuật toán $k$-way partitioning
+### Tối ưu thuật toán phân hoạch đồ thị bằng thành phần liên thông
+
+Một trong những cách tối ưu hóa thuật toán phân hoạch đồ thị bằng cách sử dụng thành phần liên thông có thể được thực hiện như sau:
+
+- Bước 1: Xác định thành phần liên thông trong đồ thị bằng cách thuật toán dựa trên DFS hoặc BFS.
+
+- Bước 2: Với mỗi thành phần liên thông, tính toán một trọng số mà thể hiện tính cân bằng của các đỉnh trong mỗi phân hoạch. Một trong những hàm trọng khả thi ở đây là trị tuyệt đố giữa số lượng nút trong mỗi phân hoạch.
+
+- Bước 3: Sắp xếp những thành phần liên thông theo trọng số giảm dần.
+
+- Bước 4: Bắt đầu với thành phần liên thông ứng với trọng số lớn nhất nhất, thực hiện phân hoạch nó thành hai phân hoạch mà có tính cân bằng nhất có thể. Bước này có thể sử dụng một số thuật toán heuristic như Kernighan-Lin hay Fiduccia-Mattheyses.
+
+- Bước 5: Lặp lại bước 4 với thành phần liên thông kế tiếp, thuật toán dừng khi tất cả các thành phần liên thông đã được xử lý.
+
+Cài đặt bằng Python
+
+```py
+def pa_scc_kl(graph):
+    # Identify the connected components in the graph using DFS
+    scc_lst = graph.find_strongly_connected_components()
+
+    # Compute the weight of each component
+    weights = [abs(len(c) - graph.numVertices/2) for c in scc_lst]
+
+    # Sort the components by weight in descending order
+    sorted_scc_lst = [c for _,c in sorted(zip(weights, scc_lst), reverse=True)]
+
+    # Initialize the partition as an empty list
+    partition = {}
+
+    # Iterate over each connected component and attempt to partition it
+    for component in sorted_scc_lst:
+        print(component)
+        subgraph = Graph()
+    
+        for vertex in component:
+            subgraph.addVertex(vertex)
+            for neighbor in graph.vertList[vertex].connectedTo:
+                if neighbor.getId() not in component:
+                    subgraph.addVertex(neighbor.getId())
+                    subgraph.addEdge(vertex, neighbor.getId(), graph.vertList[vertex].getWeight(neighbor))
+
+        
+        # Partition the subgraph using a heuristic algorithm
+        # such as Kernighan-Lin or Fiduccia-Mattheyses
+        # Here we'll use Kernighan-Lin
+        cutset_size, partition_1, partition_2 = pa_kl(subgraph)
+
+        # Add the partitions to the overall partition
+        partition.setdefault('partition_1', []).append(partition_1)
+        partition.setdefault('partition_2', []).append(partition_2)
+
+    return partition
+```
+
+
+**Thuật toán tìm kiếm thành phần liên thông (mạnh) Kosaraju's algorithm**
+
+- Bước 1: Thực hiện một Depth First Search (DFS) trên đồ thị gốc và ghi nhớ thứ tự của các đỉnh đã được duyệt.
+
+- Bước 2: Đảo ngược hướng của tất cả các cạnh để hình thành một đồ thị mới.
+
+- Bước 3: Thực hiện DFS trên đồ thị mới vừa hình thành theo thứ tự vừa nhận được ở bước 1. Đánh dấu mỗi nút thuộc cùng một thành phần liên thông.
+
+- Bước 4: Lặp lại từ bước 3 và 4 cho tất cả các nút chưa được duyệt trên đồ thị.
+
+Cài đặt bằng Python
+
+```py
+def find_strongly_connected_components(self):
+    """
+    Kosaraju algorithm
+    """
+    # Perform a Depth First Search (DFS) on the original graph 
+    # and keep track of the order in which the nodes are visited.
+    dfspath = self.DFS()
+
+    # Reverse the directions of all edges in the graph to obtain a new graph.
+    rg = self.reversing()
+
+    # Perform a DFS on the new graph, visiting the nodes in the reverse order obtained in step 1. 
+    # As you perform the DFS, mark each node as belonging to the same SCC.
+    closed_set: list[int] = []
+    scc_set = []
+
+    for idx in range(rg.numVertices):
+        if idx not in closed_set:
+            # open_set: list[int] = [idx]
+            scc = []
+
+            while dfspath:
+                cur_vertex: Vertex = rg.getVertex(dfspath.pop())
+                cur_vertex_id = cur_vertex.getId()
+
+                if cur_vertex_id not in closed_set:
+                    closed_set.append(cur_vertex_id)
+                    scc.append(cur_vertex_id)
+
+                    neighbors = [x.id for x in cur_vertex.getConnections()]
+
+                    for neighbor in neighbors:
+                        if neighbor not in closed_set:
+                            dfspath.append(neighbor)
+            scc_set.append(scc)
+
+    return scc_set
+```
 
 # Tài liệu tham khảo
 
