@@ -1,6 +1,28 @@
 from datetime import datetime
 from tqdm import tqdm
 
+import os
+import logging
+
+
+def set_logger(save_path):
+    directory = save_path
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    log_file = os.path.join(directory, 'train.log')
+    logging.basicConfig(
+        format='%(asctime)s %(levelname)-8s %(message)s',
+        level=logging.INFO,
+        datefmt='%Y-%m-%d %H:%M:%S',
+        filename=log_file,
+        filemode='w'
+    )
+    console = logging.StreamHandler()
+    console.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
+    console.setFormatter(formatter)
+    logging.getLogger('').addHandler(console)
+
 
 def get_log(message, log_type='INFO'):
     """
@@ -42,7 +64,8 @@ def save_path(path: list, file_name=None, mode='stdout'):
             raise ValueError(message)
         print(get_log('Viewing mode: ' + mode.upper()))
         print(get_log('WRITING RESULT TO FILE: ' + file_name))
-        write_data = [result[0]] + ['\n--> ' + line for line in result[1:] + ['END']]
+        write_data = [result[0]] + ['\n--> ' +
+                                    line for line in result[1:] + ['END']]
         with open(file_name, 'w') as f:
             for idx, line in zip(tqdm(range(len(write_data)), desc="Saving progress"), write_data):
                 f.write(line)

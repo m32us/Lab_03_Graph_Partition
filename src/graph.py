@@ -147,7 +147,56 @@ class Graph:
                         open_set.append(neighbor)
         return closed_set
 
+    def reversing(self, ):
+        rg = Graph()
+        for i in range(self.numVertices):
+            rg.addVertex(i)
+
+        for vertex_idx, vertex in self.vertList.items():
+            for neighbor in vertex.connectedTo:
+                rg.addEdge(neighbor.getId(), vertex.getId(),
+                           neighbor.getWeight(vertex))
+
+        return rg
+
+    def find_strongly_connected_components(self):
+        """
+        Kosaraju algorithm
+        """
+        dfspath = self.DFS()
+        rg = self.reversing()
+
+        closed_set: list[int] = []
+        scc_set = []
+
+        for idx in range(rg.numVertices):
+            if idx not in closed_set:
+                # open_set: list[int] = [idx]
+                scc = []
+
+                while dfspath:
+                    cur_vertex: Vertex = rg.getVertex(dfspath.pop())
+                    cur_vertex_id = cur_vertex.getId()
+
+                    if cur_vertex_id not in closed_set:
+                        closed_set.append(cur_vertex_id)
+                        scc.append(cur_vertex_id)
+
+                        neighbors = [x.id for x in cur_vertex.getConnections()]
+
+                        for neighbor in neighbors:
+                            if neighbor not in closed_set:
+                                dfspath.append(neighbor)
+                scc_set.append(scc)
+
+        return scc_set
+
     def compute_partition_cost(self):
+        """Computing partiion cost function
+        Returns:
+            int: partiion cost for each partition in graph.
+        """
+
         cost = []
         for vertex_idx, vertex in self.vertList.items():
             for neighbor in vertex.connectedTo.keys():
@@ -156,6 +205,10 @@ class Graph:
         return sum(cost)
 
     def compute_adjacency_matrix(self, ):
+        """Computing adjacency matrix for graph
+        Returns:
+            np.darray: adjacency matrix for graph
+        """
         adjacency_matrix = np.zeros((self.numVertices, self.numVertices))
         for vertex_idx, vertex in self.vertList.items():
             for neighbor in vertex.connectedTo:
@@ -164,6 +217,10 @@ class Graph:
         return adjacency_matrix
 
     def degree_nodes(self, adjacency_matrix):
+        """Compute the degree of each node
+        Returns:
+            np.darray: the vector of degrees
+        """
         d = []
         for idx in range(self.numVertices):
             d.append(sum([1 if adjacency_matrix[idx][jdx] !=
@@ -171,10 +228,14 @@ class Graph:
         return d
 
     def compute_laplacian_matrix(self, ):
-        print('Computing Adjacency Matrix')
+        """Compute the the Laplacian matrix for graph.
+        Returns:
+            np.darray: the Laplacian matrix for graph.
+        """
+        # print('Computing Adjacency Matrix')
         adjacency_matrix = self.compute_adjacency_matrix()
-        print('Computing the degree of each node')
+        # print('Computing the degree of each node')
         degrees = self.degree_nodes(adjacency_matrix)
-        print('Computing the Laplacian matrix')
+        # print('Computing the Laplacian matrix')
         laplacian_matrix = np.diag(degrees) - adjacency_matrix
         return laplacian_matrix

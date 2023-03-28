@@ -1,5 +1,8 @@
-from support import get_log
+import logging
 import numpy as np
+
+from graph import Graph
+
 
 # Partitioning Algorithms
 
@@ -74,6 +77,9 @@ def pa_bfs(graph, vertex_ith: int, threshold: int):
                     L1.add(neighborId)
                 queue.append(neighborId)
         level += 1
+
+    logging.info("Group A vertices: {}".format(L1))
+    logging.info("Group B vertices: {}".format(L2))
     return L1, L2
 
 
@@ -102,6 +108,7 @@ def pa_kl(graph):
     [1] Graph Partitioning, https://patterns.eecs.berkeley.edu/?page_id=571#1_BFS
     """
     # Partition the vertices into two equal-sized groups A and B.
+
     half = graph.numVertices // 2
     for ind in range(half):
         graph.vertList[ind].partition_label = 'A'
@@ -176,9 +183,9 @@ def pa_kl(graph):
                if v.partition_label == "B"]
 
     # Print the results
-    print("Cut size: {}".format(cutset_size))
-    print("Group A vertices: {}".format(group_a))
-    print("Group B vertices: {}".format(group_b))
+    logging.info("Cut size: {}".format(cutset_size))
+    logging.info("Group A vertices: {}".format(group_a))
+    logging.info("Group B vertices: {}".format(group_b))
 
     return cutset_size, group_a, group_b
 
@@ -294,9 +301,9 @@ def pa_fm(graph):
                if v.partition_label == "B"]
 
     # Print the results
-    print("Cut size: {}".format(cutset_size))
-    print("Group A vertices: {}".format(group_a))
-    print("Group B vertices: {}".format(group_b))
+    logging.info("Cut size: {}".format(cutset_size))
+    logging.info("Group A vertices: {}".format(group_a))
+    logging.info("Group B vertices: {}".format(group_b))
 
     return cutset_size, group_a, group_b
 
@@ -340,19 +347,19 @@ def pa_sb(graph):
     [1] Graph Partitioning, https://patterns.eecs.berkeley.edu/?page_id=571#1_BFS
     """
     laplacian_matrix = graph.compute_laplacian_matrix()
-    print('Computing the eigenvectors and eigenvalues')
+    logging.info('Computing the eigenvectors and eigenvalues')
     eigenvalues, eigenvectors = np.linalg.eigh(laplacian_matrix)
 
     # Index of the second eigenvalue
     index_fnzev = np.argsort(eigenvalues)[1]
-    print('Eigenvector for #{} eigenvalue ({}): '.format(
+    logging.info('Eigenvector for #{} eigenvalue ({}): '.format(
         index_fnzev, eigenvalues[index_fnzev]), eigenvectors[:, index_fnzev])
 
     # Partition on the sign of the eigenvector's coordinates
     partition = [val >= 0 for val in eigenvectors[:, index_fnzev]]
 
     # Compute the edges in between
-    print(partition)
+    logging.info('Compute the edges in between two groups.')
     a = [idx for (idx, group_label) in enumerate(partition) if group_label]
     b = [idx for (idx, group_label) in enumerate(partition) if not group_label]
 
@@ -361,8 +368,8 @@ def pa_sb(graph):
     group_b = [v.id for k, v in graph.vertList.items()
                if v.id in b]
 
-    print("Group A vertices: {}".format(group_a))
-    print("Group B vertices: {}".format(group_b))
+    logging.info("Group A vertices: {}".format(group_a))
+    logging.info("Group B vertices: {}".format(group_b))
     return group_a, group_b
 
 
@@ -370,6 +377,46 @@ def pa_sb(graph):
 The Spectral Bisection algorithm is a powerful graph partitioning algorithm that can produce high-quality partitions for a wide range of graph types. 
 However, it can be computationally expensive, especially for large graphs, due to the need to compute the eigenvalues and eigenvectors of the Laplacian matrix.
 """
+#########################################################################################################
+def pa_scc_kl(graph):
+    # Identify the connected components in the graph using DFS
+    scc_lst = graph.find_strongly_connected_components()
+
+    # Compute the weight of each component
+    weights = [abs(len(c) - graph.numVertices/2) for c in scc_lst]
+
+    # Sort the components by weight in descending order
+    sorted_scc_lst = [c for _,c in sorted(zip(weights, scc_lst), reverse=True)]
+
+    # Initialize the partition as an empty list
+    partition = {}
+
+    # Iterate over each connected component and attempt to partition it
+    for component in sorted_scc_lst:
+        print(component)
+        subgraph = Graph()
+    
+        for vertex in component:
+            subgraph.addVertex(vertex)
+            for neighbor in graph.vertList[vertex].connectedTo:
+                if neighbor.getId() not in component:
+                    subgraph.addVertex(neighbor.getId())
+                    subgraph.addEdge(vertex, neighbor.getId(), graph.vertList[vertex].getWeight(neighbor))
+
+        
+        # Partition the subgraph using a heuristic algorithm
+        # such as Kernighan-Lin or Fiduccia-Mattheyses
+        # Here we'll use Kernighan-Lin
+        cutset_size, partition_1, partition_2 = pa_kl(subgraph)
+
+        # Add the partitions to the overall partition
+        partition.setdefault('partition_1', []).append(partition_1)
+        partition.setdefault('partition_2', []).append(partition_2)
+
+    print(partition)
+    return partition
+
+
 
 #########################################################################################################
 # k-way partitioning
