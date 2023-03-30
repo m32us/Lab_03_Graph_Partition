@@ -1,3 +1,5 @@
+import math
+
 from vertex import *
 from support import *
 
@@ -11,8 +13,9 @@ class Graph:
         """
         self.vertList = {}
         self.numVertices = 0
+        self.directedProp = True
 
-    def addVertex(self, key):
+    def addVertex(self, key, label=None):
         """
         Module adding a vertex to Graph.
 
@@ -20,9 +23,12 @@ class Graph:
         :return: `key` as Vertex class
         """
         self.numVertices = self.numVertices + 1
-        newVertex = Vertex(key)
+        newVertex = Vertex(key, label)
         self.vertList[key] = newVertex
         return newVertex
+
+    def isDirected(self):
+        return self.directedProp
 
     def getVertex(self, n):
         """
@@ -45,7 +51,7 @@ class Graph:
         """
         return n in self.vertList
 
-    def addEdge(self, f, t, weight=0, is_directed=True):
+    def addEdge(self, f, t, weight=0):
         """
         Module adding an Edge to Graph.
 
@@ -58,11 +64,9 @@ class Graph:
             nv = self.addVertex(f)
         if t not in self.vertList:
             nv = self.addVertex(t)
-
         self.vertList[f].addNeighbor(self.vertList[t], weight)
-
-        # if not is_directed:
-        #     self.vertList[t].addNeighbor(self.vertList[f], weight)
+        if not self.isDirected():
+            self.vertList[f].addNeighbor(self.vertList[t], weight)
 
     def getVertices(self):
         """
@@ -88,7 +92,7 @@ class Graph:
         vertex = self.getVertex(vertex_ith)  # get the vertex `vertex_ith`.
         if not vertex:  # checking if not exist `vertex_ith` in Graph then raise error
             message = 'Invalid vertex id, could not found vertex id `' + \
-                str(vertex_ith) + '` in Graph'
+                      str(vertex_ith) + '` in Graph'
             raise ValueError(get_log(message, log_type='ERROR'))
         n = self.numVertices  # get the number of vertices.
         visited = [False] * n  # bool array for marking visited or not.
@@ -128,7 +132,7 @@ class Graph:
         vertex: Vertex = self.getVertex(vertex_ith)
         if vertex is None:
             message = 'Invalid vertex id, could not found vertex id `' + \
-                str(vertex_ith) + '` in Graph'
+                      str(vertex_ith) + '` in Graph'
             raise ValueError(get_log(message, log_type='ERROR'))
 
         closed_set: list[int] = []
@@ -230,11 +234,11 @@ class Graph:
         d = []
         for idx in range(self.numVertices):
             d.append(sum([1 if adjacency_matrix[idx][jdx] !=
-                     0 else 0 for jdx in range(self.numVertices)]))
+                               0 else 0 for jdx in range(self.numVertices)]))
         return d
 
     def compute_laplacian_matrix(self, ):
-        """Compute the the Laplacian matrix for graph.
+        """Compute the Laplacian matrix for graph.
         Returns:
             np.darray: the Laplacian matrix for graph.
         """
@@ -245,3 +249,50 @@ class Graph:
         # print('Computing the Laplacian matrix')
         laplacian_matrix = np.diag(degrees) - adjacency_matrix
         return laplacian_matrix
+
+    def compute_total_weight(self):
+        total = 0
+        for vertex in self.vertList.values():
+            for neighbor in vertex.getConnections():
+                total += vertex.getWeight(neighbor)
+
+        if self.isDirected():
+            return total
+        return total // 2
+
+    def initialize_label(self):
+        half = self.numVertices // 2
+        for ind in range(half):
+            self.vertList[ind].partition_label = 'A'
+            self.vertList[ind + half].partition_label = 'B'
+
+    def get_edge_weight_bfs(self, v1, v2):
+        if v1 == v2:
+            return 0
+        vertex = self.getVertex(v1)  # get the vertex `vertex_ith`.
+        if not vertex:  # checking if not exist `vertex_ith` in Graph then raise error
+            message = 'Invalid vertex id, could not found vertex id `' + \
+                      str(v1) + '` in Graph'
+            raise ValueError(get_log(message, log_type='ERROR'))
+        n = self.numVertices  # get the number of vertices.
+        visited = [False] * n  # bool array for marking visited or not.
+        vertex_id = vertex.getId()  # get the vertex_id for easy management.
+        # initializing a queue to handling which vertex is remaining.
+        queue = [(vertex_id, 0)]
+        # marking the `vertex_id` is visited due to the beginning vertex.
+        visited[vertex_id] = True
+        while queue:
+            # handling current vertex before removing out of queue.
+            cur_pos, distance = queue[0]
+            queue.pop(0)  # remove it out of queue
+            vertex_cur = self.getVertex(cur_pos)
+            # current vertex.
+            for neighbor in vertex_cur.getConnections():  # loop over the neighbor of current vertex.
+                neighborId = neighbor.getId()
+                if v2 == neighborId:
+                    return vertex_cur.getWeight(neighbor)
+                # if not visited then push that vertex into queue.
+                if not visited[neighborId]:
+                    visited[neighborId] = True
+                    queue.append((neighborId, distance + vertex_cur.getWeight(neighbor)))
+        return math.inf
