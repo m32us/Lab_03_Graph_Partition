@@ -13,8 +13,8 @@ title: "\\thetitle"
 **Công việc**|**Người thực hiện**
 :------------------:|:----------------------------------------:
 Tái cấu trúc đồ thị theo yêu cầu của thầy|Xuân Lộc
-Viết hàm và tài liệu cho thuật toán `BFS`, `Kerninghan-Lin`, `Fiduccia-Mattheyses`, và `Spectral Bisection` |Nhựt Nam
-Viết hàm và tài liệu cho thuật toán `BFS`|Xuân Lộc
+Viết hàm và tài liệu cho thuật toán `BFS`, `Kerninghan-Lin`, `Fiduccia-Mattheyses` và `Spectral Bisection` |Nhựt Nam
+Viết hàm và tài liệu cho thuật toán `BFS`, `Recursive bisection`, `Greedy Graph Coloring` và `K-medoids`|Xuân Lộc
 
 \newpage
 
@@ -103,10 +103,21 @@ Trong bài lab này, chúng em thiết kế thêm một số hàm hỗ trợ tí
 
 - Hàm `compute_adjacency_matrix(self, )`: 
     - Trả về: mảng numpy thể hiện biểu diễn ma trận kề của đồ thị.
+
 - Hàm `degree_nodes(self, adjacency_matrix)`:
     - Trả về: numpy vector thể hiện bậc của các đỉnh trong đồ thị.
+
 - Hàm `compute_laplacian_matrix(self, )`:
     - Trả về: mảng numpy thể hiện biểu diễn ma trận Laplacian của đồ thị.
+
+- Hàm `get_edge_weight_bfs(self, v1, v2)`: 
+    - Trả về khoảng cách giữa 2 đỉnh $v_1$ và $v_2$ trong đồ thị, trả về vô cực nếu không tồn tại liên kết.
+
+- Hàm `compute_total_weight(self)`:
+    - Trả về tổng trọng số liên kết của các cạnh trong đồ thị, chia 2 giá trị nếu là đồ thị vô hướng.
+
+- Hàm `initialize_label(self)`:
+    - Trả về giá trị khởi tạo nhãn `partition_label` cho đồ thị với mặc định là một nữa số đỉnh mang nhãn `A` và 1 nữa còn lại mang nhãn `B`. 
 
 ## Tổ chức dữ liệu đỉnh của lớp `Vertex`
 
@@ -167,66 +178,7 @@ Phần này sẽ tập trung mô tả các hàm hỗ trợ ghi dữ liệu và h
 
 \newpage
 
-## Mô tả thuật toán DFS, BFS
-
-### Thuật toán DFS
-
-- Ý tưởng thuật toán: Bắt đầu từ đỉnh xuất phát đi xa nhất có thể, đến khi không thể đi được nữa thì quay lui (backtracking). Chính vì vậy, có thể cài đặt thuật toán này bằng đệ quy hoặc sử dụng một ngăn xếp.
-
-- Thuật toán được cài đặt như sau:
-
-    ```python
-    def DFS(self, vertex_ith: int):
-        """depth first search function, start from `vertex_ith`
-        Args: vertex_ith (int): key of vertex in graph
-        Raises: ValueError: can't find a vertex with given key
-        Returns: list[int]: the path that DFS agent has gone through
-        """
-        vertex: Vertex = self.getVertex(vertex_ith)
-        if vertex is None:
-            message = 'Invalid vertex id, could not found vertex id `' + str(vertex_ith) + '` in Graph'
-            raise ValueError(get_log(message, log_type='ERROR'))
-
-        closed_set: list[int] = []
-        open_set: list[int] = [vertex.getId()]
-
-        while open_set:
-            cur_vertex: Vertex = self.getVertex(open_set.pop())
-            cur_vertex_id = cur_vertex.getId()
-
-            if cur_vertex_id not in closed_set:
-                closed_set.append(cur_vertex_id)
-                neighbors = [x.id for x in cur_vertex.getConnections()]
-
-                for neighbor in neighbors:
-                    if neighbor not in closed_set:
-                        open_set.append(neighbor)
-        return closed_set
-    ```
-
-- Minh họa thuật toán:
-    - Đồ thị:
-
-        ![Minh họa đồ thị ](./img/graph.png)
-
-    - Quá trình duyệt đồ thị:
-
-        | current node |  stack  |    visited    |
-        |:------------:|:-------:|:-------------:|
-        |       0      |  {1,5}  |      {0}      |
-        |       5      | {1,4,2} |     {0,5}     |
-        |       2      | {1,4,3} |    {0,5,2}    |
-        |       3      |  {1,4}  |   {0,5,2,3}   |
-        |       4      |   {1}   |  {0,5,2,3,4}  |
-        |       1      |    {}   | {0,5,2,3,4,1} |
-
-    - Kết quả: Thứ tự duyệt của đồ thị là $\{0,5,2,3,4,1\}$
-
-    - Minh họa bằng cây tìm kiếm:
-
-        ![Minh họa thuật toán DFS bằng cây tìm kiếm. Thứ tự duyệt được thể hiện trong hình tròn màu xanh.](./img/tree_dfs.png){height=60%}
-
-### Thuật toán BFS
+## Thuật toán BFS
 
 - Ý tưởng thuật toán: Bắt đầu từ đỉnh xuất phát đi rộng nhất có thể, đến khi không thể đi được nữa thì quay lại đi xuống 1 bậc đồ thị để tiếp tục quá trình tương tự. Do đó, ta có thể cài đặt thuật toán này bằng 1 hàng đợi và 1 mảng đánh dấu đã duyệt là đủ.
 
@@ -319,96 +271,27 @@ Với một bài toán phân hoạch cân bằng $(k, v)$m mục tiêu là phân
 
 Trong báo cáo kỹ thuật này, chúng em xem xét bài toán phân hoạch đồ thị thành hai thành phần. Chúng em thực hiện cài đặt các thuật toán như sau:
 
-- BFS
+- Phân hoạch dựa trên BFS.
 
-- Kernighan-Lin Algorithm
+- Kernighan-Lin Algorithm.
 
-- Fiduccia-Mattheyses Partitioning Algorithm
+- Fiduccia-Mattheyses Partitioning Algorithm.
 
-- Spectral Bisection
+- Spectral Bisection.
 
-- $k$-way partitioning
+- Tối ưu thuật toán phân hoạch đồ thị bằng thành phần liên thông.
+
+- Recursive Bisection.
+
+- Graph Coloring.
+
+- K-medoids.
 
 ### Thuật toán phân hoạch dựa trên BFS
 
 Thuật toán tìm kiếm theo chiều rộng có thể sử dụng để giải quyết bài toán phân hoạch đồ thị. 
 
 Ý tưởng: Thuật toán BFS duyệt đồ thị theo từng mức (level by level), và bằng cách đánh dấu mỗi đỉnh với level mà nó được viếng thăm. Tập hợp các đỉnh của đồ thị được phân thành hai phần $V_1$ và $V_2$ bằng cách đặt những đỉnh mà có level nhỏ hơn hoặc bằng một nhưỡng $L$ được xác định từ trước.
-
-```py
-def pa_bfs(graph, vertex_ith: int, threshold: int):
-    """Algorithm description:
-        We can use basic graph search algorithm to solve graph partition algorithm :)
-        Basically, the well-known BFS (Breadth-First-Search) algorithm can be modified to help us divide graph into two parts.
-        BFS algorithm traverses the graph level by level and marks each vertex with the level in which it was visited. 
-        After completion of the traversal, the set of vertices of the graph is portioned into two parts $V_1$ and $V_2$ by putting 
-        all vertices with level less than or equal to a pre-determined threshold $L$ in the set V1 and putting the remaining vertices 
-        (with level greater than $L$) in the set $V_2$. $L$ is so chosen that $|V1|$ is close to $|V2|$.
-
-    References: 
-    [1] Graph Partitioning, https://patterns.eecs.berkeley.edu/?page_id=571#1_BFS
-    """
-    L1 = set()
-    L2 = set()
-
-    # get the vertex `vertex_ith`.
-    vertex = graph.getVertex(vertex_ith)
-
-    # checking if not exist `vertex_ith` in Graph then raise error.
-    if not vertex:
-        message = 'Invalid vertex id, could not found vertex id `' + \
-            str(vertex_ith) + '` in Graph'
-        raise ValueError(get_log(message, log_type='ERROR'))
-
-    # get the number of vertices.
-    n = graph.numVertices
-
-    # bool array for marking visited or not.
-    visited = [False] * n
-
-    # get the vertex_id for easy management.
-    vertex_id = vertex.getId()
-
-    # initializing a queue to handling which vertex is remaining.
-    queue = [vertex_id]
-
-    # marking the `vertex_id` is visited due to the beginning vertex.
-    visited[vertex_id] = True
-
-    path = []  # path to track the working state of BFS.
-
-    level = 0
-    while queue:
-        # handling current vertex before removing out of queue.
-        cur_pos = queue[0]
-
-        # appending to path to track.
-        path.append(cur_pos)
-
-        # remove it out of queue
-        queue.pop(0)
-
-        # get all neighbors id of current vertex.
-        neighbor_cur_pos = [
-            x.id for x in graph.getVertex(cur_pos).getConnections()]
-
-        # loop over the neighbor of current vertex.
-        for neighborId in neighbor_cur_pos:
-            # if not visited then push that vertex into queue.
-            if not visited[neighborId]:
-                visited[neighborId] = True
-                graph.vertList[neighborId].level = level
-                if level >= threshold:
-                    L2.add(neighborId)
-                else:
-                    L1.add(neighborId)
-                queue.append(neighborId)
-        level += 1
-
-    logging.info("Group A vertices: {}".format(L1))
-    logging.info("Group B vertices: {}".format(L2))
-    return L1, L2
-```
 
 ### Thuật toán Kernighan-Lin
 
@@ -443,198 +326,23 @@ Compute T = cost(A,B) for initial A,
 
 Cài đặt thuật toán bằng Python
 
-Khởi tạo hai thành phần phân hoạch có kích thước bằng nhau
+- Bước 1: Khởi tạo hai thành phần phân hoạch có kích thước bằng nhau.
 
-```py
-# Partition the vertices into two equal-sized groups A and B.
-half = graph.numVertices // 2
-for ind in range(half):
-    graph.vertList[ind].partition_label = 'A'
-    graph.vertList[ind + half].partition_label = 'B'
-```
+- Bước 2: Tính toán `D_values` cho một lần duyệt.
 
-Tính toán `D_values` cho một lần duyệt
+- Bước 3: Tính toán độ lợi cho tất cả các hoán vị đỉnh có thể có giữa hai thành phần phân hoạch.
 
-```py
-group_a = [v.id for k, v in graph.vertList.items()
-                   if v.partition_label == "A"]
-group_b = [v.id for k, v in graph.vertList.items()
-            if v.partition_label == "B"]
+- Bước 4: Sắp xếp và lấy ra độ lợi lớn nhất.
 
-D_values = {}
+- Bước 5: Lấy ra cặp đỉnh với độ lợi lớn nhất và hoán vị nhãn phân hoạch của chúng.
 
-for idx, vertex in graph.vertList.items():
-    for neighbor in vertex.connectedTo:
-        if vertex.partition_label == neighbor.partition_label:
-            vertex.internal_cost += vertex.getWeight(neighbor)
-        else:
-            vertex.external_cost -= vertex.getWeight(neighbor)
-
-    D_values.update(
-        {idx: graph.vertList[idx].external_cost + graph.vertList[idx].internal_cost})
-```
-
-Tính toán độ lợi cho tất cả các hoán vị đỉnh có thể có giữa hai thành phần phân hoạch.
-
-```py
-# Compute the gains for all possible vertex swaps between groups A and B.
-gains = []
-for a in group_a:
-    for b in group_b:
-        c_ab = graph.vertList[a].getWeight(graph.vertList[b])
-        gain = D_values[a] + D_values[b] - (2 * c_ab)
-        gains.append([[a, b], gain])
-```
-
-Sắp xếp và lấy ra độ lợi lớn nhất.
-
-```py
-# Sort the gains in descending order and get the maximum gain.
-gains = sorted(gains, key=lambda x: x[1], reverse=True)
-max_gain = gains[0][1]
-
-if max_gain <= 0:
-    break
-```
-
-Lấy ra cặp đỉnh với độ lợi lớn nhất và hoán vị nhãn phân hoạch của chúng.
-```py
-# Get the pair of vertices with the maximum gain and swap their partition labels.
-pair = gains[0][0]
-group_a.remove(pair[0])
-group_b.remove(pair[1])
-
-graph.vertList[pair[0]].partition_label = "B"
-graph.vertList[pair[1]].partition_label = "A"
-```
-
-Cập nhật độ lợi cho các đỉnh trong phân hoạch.
-
-```py
-# Update the D values of the vertices in groups A and B.
-for x in group_a:
-    c_xa = graph.vertList[x].getWeight(graph.vertList[pair[0]])
-    c_xb = graph.vertList[x].getWeight(graph.vertList[pair[1]])
-    D_values[x] += 2 * c_xa - 2 * c_xb
-
-for y in group_b:
-    c_ya = graph.vertList[y].getWeight(graph.vertList[pair[0]])
-    c_yb = graph.vertList[y].getWeight(graph.vertList[pair[1]])
-    D_values[x] += 2 * c_ya - 2 * c_yb
-
-# Update the total gain.
-total_gain += max_gain
-```
-
-Toàn bộ mã nguồn thuật toán
-
-```py
-def pa_kl(graph):
-    """Algorithm description:
-    The KL algorithm is a heuristic algorithm for partitioning a graph into two disjoint sets of vertices with roughly equal sizes, 
-    while minimizing the total weight of the edges between the two sets. The algorithm works by iteratively swapping vertices 
-    between the two sets in a way that reduces the total weight of the cut.
-
-    The algorithm starts by dividing the vertices into two sets, A and B, with roughly equal sizes. 
-    Then, it iteratively performs the following steps:
-        Step 1: Compute the net gain for moving each vertex from set A to set B, and vice versa. 
-        The net gain is defined as the difference between the sum of the weights of the edges 
-        that connect the vertex to its current set and the sum of the weights of the edges 
-        that connect the vertex to the other set.
-
-        Step 2: Select the pair of vertices with the highest net gain, one from set A and one from set B, and swap them.
-
-        Step 3: Update the net gains for the affected vertices, and repeat the process until no more swaps can be made.
-
-    The algorithm terminates when no more swaps can be made that improve the total weight of the cut. 
-    The final partitioning is the one that results in the minimum cut.
-
-    References: 
-    [1] Graph Partitioning, https://patterns.eecs.berkeley.edu/?page_id=571#1_BFS
-    """
-    # Partition the vertices into two equal-sized groups A and B.
-    half = graph.numVertices // 2
-    for ind in range(half):
-        graph.vertList[ind].partition_label = 'A'
-        graph.vertList[ind + half].partition_label = 'B'
-
-    total_gain = 0
-
-    # Keep track of the total gain in each iteration.
-    for _ in range(half):
-        # Get the vertices in groups A and B and their D values.
-        group_a = [v.id for k, v in graph.vertList.items()
-                   if v.partition_label == "A"]
-        group_b = [v.id for k, v in graph.vertList.items()
-                   if v.partition_label == "B"]
-
-        D_values = {}
-
-        for idx, vertex in graph.vertList.items():
-            for neighbor in vertex.connectedTo:
-                if vertex.partition_label == neighbor.partition_label:
-                    vertex.internal_cost += vertex.getWeight(neighbor)
-                else:
-                    vertex.external_cost -= vertex.getWeight(neighbor)
-
-            D_values.update(
-                {idx: graph.vertList[idx].external_cost + graph.vertList[idx].internal_cost})
-
-        # Compute the gains for all possible vertex swaps between groups A and B.
-        gains = []
-        for a in group_a:
-            for b in group_b:
-                c_ab = graph.vertList[a].getWeight(graph.vertList[b])
-                gain = D_values[a] + D_values[b] - (2 * c_ab)
-                gains.append([[a, b], gain])
-
-        # Sort the gains in descending order and get the maximum gain.
-        gains = sorted(gains, key=lambda x: x[1], reverse=True)
-        max_gain = gains[0][1]
-
-        if max_gain <= 0:
-            break
-
-        # Get the pair of vertices with the maximum gain and swap their partition labels.
-        pair = gains[0][0]
-        group_a.remove(pair[0])
-        group_b.remove(pair[1])
-
-        graph.vertList[pair[0]].partition_label = "B"
-        graph.vertList[pair[1]].partition_label = "A"
-
-        # Update the D values of the vertices in groups A and B.
-        for x in group_a:
-            c_xa = graph.vertList[x].getWeight(graph.vertList[pair[0]])
-            c_xb = graph.vertList[x].getWeight(graph.vertList[pair[1]])
-            D_values[x] += 2 * c_xa - 2 * c_xb
-
-        for y in group_b:
-            c_ya = graph.vertList[y].getWeight(graph.vertList[pair[0]])
-            c_yb = graph.vertList[y].getWeight(graph.vertList[pair[1]])
-            D_values[x] += 2 * c_ya - 2 * c_yb
-
-        # Update the total gain.
-        total_gain += max_gain
-
-        # break
-
-    # Get the cutset size and the vertex IDs in groups A and B.
-    cutset_size = graph.compute_partition_cost()
-    group_a = [v.id for k, v in graph.vertList.items()
-               if v.partition_label == "A"]
-    group_b = [v.id for k, v in graph.vertList.items()
-               if v.partition_label == "B"]
-
-    # Print the results
-    logging.info("Cut size: {}".format(cutset_size))
-    logging.info("Group A vertices: {}".format(group_a))
-    logging.info("Group B vertices: {}".format(group_b))
-
-    return cutset_size, group_a, group_b
-```
+- Bước 6: Cập nhật độ lợi cho các đỉnh trong phân hoạch.
 
 ### Thuật toán Fiduccia-Mattheyses Partitioning
+
+Fiduccia-Mattheyeses algorithm là một thuật toán phân hoạch dựa trên heuristic mà tổng quát khái niệm hoán vị đỉnh mà được giới thiệu trong thuật toán KL. Thuật toán FL được cài đặt để phân hoạch siêu đồ thị (hypergraph), thay vì hoán vị đỉnh như KL, nó hoán vị một đỉnh đơn trong một lần duyệt.
+
+Bản chất của thuật toán FL giống với thuật toán KL, định nghĩa độ lợi (gain) cho mỗi đỉnh trong đồ thị (siêu đồ thị), chọn một nút theo một số tiêu chí, loại bỏ nó trong phân hoạch hiện tại, khóa đỉnh đó, cập nhật tất cả các độ lợi của các đỉnh chưa bị khóa, và lặp lại cho đến khi chúng ta đạt được tối ưu cục bộ.
 
 ### Thuật toán Spectral Bisection
 
@@ -650,74 +358,92 @@ Lý thuyết spectral bisection được phát triển vào năm 1970 bởi Fied
 
 Thuật toán Spectral Bisection
 
-- Bước 1: Xây dựng ma trận Laplacian matrix $L(G)$ cho đồ thị đầu vào $G = (V,E)$
+- Bước 1: Xây dựng ma trận Laplacian matrix $L(G)$ cho đồ thị đầu vào $G = (V,E)$.
 
-- Bước 2: Tính toán vector riêng $v_2$ tương ứng với trị riêng thứ hai $\lambda_2$ của ma trận Laplacian matrix $L(G)$
+- Bước 2: Tính toán vector riêng $v_2$ tương ứng với trị riêng thứ hai $\lambda_2$ của ma trận Laplacian matrix $L(G)$.
 
 - Bước 3: Với mỗi đỉnh $i \in V$:
-    - nếu $v_2[i] < 0$ đặt đỉnh này vào phân hoạch A
+    - Nếu $v_2[i] < 0$ đặt đỉnh này vào phân hoạch A.
 
-    - ngược lại thì đặt đỉnh này phân hoạch B.
+    - Ngược lại thì đặt đỉnh này phân hoạch B.
 
-Cài đặt thuật toán bằng Python
+### Tối ưu thuật toán phân hoạch đồ thị bằng thành phần liên thông
 
-```py
-def pa_sb(graph):
-    """Algorithm description:
+Một trong những cách tối ưu hóa thuật toán phân hoạch đồ thị bằng cách sử dụng thành phần liên thông có thể được thực hiện như sau:
 
-    The Spectral Bisection algorithm is a graph partitioning algorithm that is based on the eigenvalues and eigenvectors of the graph Laplacian matrix. 
-    The algorithm works by iteratively bisecting the graph into two disjoint sets of vertices with roughly equal sizes, while minimizing 
-    the total weight of the edges between the two sets.
+- Bước 1: Xác định thành phần liên thông trong đồ thị bằng cách thuật toán dựa trên DFS hoặc BFS.
 
-    The algorithm starts by computing the eigenvectors corresponding to the smallest eigenvalues of the graph Laplacian matrix. 
-    The eigenvectors are then used to partition the graph into two sets of vertices, A and B, by assigning each vertex to 
-    the set that corresponds to the sign of the corresponding eigenvector component. This initial partitioning is not guaranteed
-    to be balanced, but is usually close to it.
+- Bước 2: Với mỗi thành phần liên thông, tính toán một trọng số mà thể hiện tính cân bằng của các đỉnh trong mỗi phân hoạch. Một trong những hàm trọng khả thi ở đây là trị tuyệt đố giữa số lượng nút trong mỗi phân hoạch.
 
-    Then, the algorithm iteratively improves the partitioning by performing the following steps:
-        Step 1: Compute the cut size of the current partitioning.
-        Step 2: Compute the eigenvectors corresponding to the second-smallest eigenvalues of the graph Laplacian matrix.
-        Step 3: Compute the projection of the current partitioning onto the space spanned by the eigenvectors corresponding 
-        to the smallest and second-smallest eigenvalues. This projection is used to determine a new partitioning by assigning
-        each vertex to the set that corresponds to the sign of the projection.
-        Step 4: Compute the cut size of the new partitioning, and select it if it has a smaller cut size than the current partitioning. 
-        Otherwise, discard the new partitioning and continue with the current one.
+- Bước 3: Sắp xếp những thành phần liên thông theo trọng số giảm dần.
 
-    The algorithm terminates when no more improvements can be made, or when a desired balance ratio between the two sets is achieved. 
-    The final partitioning is the one that results in the minimum cut.
+- Bước 4: Bắt đầu với thành phần liên thông ứng với trọng số lớn nhất nhất, thực hiện phân hoạch nó thành hai phân hoạch mà có tính cân bằng nhất có thể. Bước này có thể sử dụng một số thuật toán heuristic như Kernighan-Lin hay Fiduccia-Mattheyses.
 
-    References: 
-    [1] Graph Partitioning, https://patterns.eecs.berkeley.edu/?page_id=571#1_BFS
-    """
-    laplacian_matrix = graph.compute_laplacian_matrix()
-    logging.info('Computing the eigenvectors and eigenvalues')
-    eigenvalues, eigenvectors = np.linalg.eigh(laplacian_matrix)
+- Bước 5: Lặp lại bước 4 với thành phần liên thông kế tiếp, thuật toán dừng khi tất cả các thành phần liên thông đã được xử lý.
 
-    # Index of the second eigenvalue
-    index_fnzev = np.argsort(eigenvalues)[1]
-    logging.info('Eigenvector for #{} eigenvalue ({}): '.format(
-        index_fnzev, eigenvalues[index_fnzev]), eigenvectors[:, index_fnzev])
+### Thuật toán Recursive Bisection
 
-    # Partition on the sign of the eigenvector's coordinates
-    partition = [val >= 0 for val in eigenvectors[:, index_fnzev]]
+**Recursive Bisection** là thuật toán dùng để phân hoạch đồ thị thành 2 đồ thị con dựa trên một tiêu chí phân hoạch nào đó. Ở đây, nhóm sử dụng tiêu chí liên quan để tỉ lệ của hiệu của tổng bậc đỉnh của đồ thị con 1 với đồ thị con 2, chia cho đồ thị cha nhỏ hơn giá trị $\theta$ cho trước và biến `min_size` được sử dụng để khống chế kích thước đồ thị con khi bị phân hoạch thành các đồ thị có kích thước quá nhỏ.
 
-    # Compute the edges in between
-    logging.info('Compute the edges in between two groups.')
-    a = [idx for (idx, group_label) in enumerate(partition) if group_label]
-    b = [idx for (idx, group_label) in enumerate(partition) if not group_label]
+Các bước chạy thuật toán **Recursive Bisection**:
 
-    group_a = [v.id for k, v in graph.vertList.items()
-               if v.id in a]
-    group_b = [v.id for k, v in graph.vertList.items()
-               if v.id in b]
+- Bước 1: Xây dựng tiêu chí đánh giá khi nào đồ thị hội tụ, ở đây dựa trên bậc của đỉnh.
 
-    logging.info("Group A vertices: {}".format(group_a))
-    logging.info("Group B vertices: {}".format(group_b))
-    return group_a, group_b
-```
+- Bước 2: Khi kích thước đồ thị đang xét nhỏ hơn giá trị `min_size` và vượt số lần gọi đệ quy cho phép `max_levels` thì dừng chương trình và trả về 2 đồ thị con.
 
-### Thuật toán $k$-way partitioning
+- Bước 3: Phân hoạch trên đồ thị gốc thành 2 đồ thị con dựa trên tỉ lệ bậc đỉnh.
+
+$balance\_byWeight = abs(subgraph1.compute\_total\_weight() - subgraph2.compute\_total\_weight())
+                       / graph.compute\_total\_weight()$
+
+- Bước 4: Nếu thỏa mãn điều kiện $balance\_byWeight < \theta$ thì dừng chương trình và lưu trữ lại các đồ thị con.
+
+- Bước 5: Gọi đệ quy lại cho đồ thị con `subgraph1` và `subgraph2`.
+
+### Thuật toán Greedy Graph Coloring
+
+Thuật toán **Greedy Graph Coloring** gán màu cho mỗi đỉnh trong đồ thị theo chiến lược tham, mỗi đỉnh sao khi được duyệt qua sẽ được gán nhãn sẽ không xuất hiện xung quanh các láng giềng đã được tô màu trước đó. Nhưng điểm yếu của thuật toán này là chưa tìm kiếm được số lượng màu tối ưu và số lượng màu tìm được bằng thuật toán này có thể nhiều hơn rất nhiều so với số lượng màu tối ưu của nó. Hơn nữa, thuật toán này đặc trưng bởi tính đơn giản và có khả năng thực hiện trên các đồ thị lớn.
+
+Cài đặt thuật toán bằng python:
+
+- Bước 1: Khởi tạo từ điển để đánh dấu đỉnh thuộc màu nào và sắp xếp thứ tự các đỉnh theo bậc của nó.
+
+- Bước 2: Duyệt qua các đỉnh, ở mỗi đỉnh duyệt qua các láng giềng của đỉnh đó và đánh dấu màu của lại láng giềng nào đã được gán màu vào tập ```used_colors```.
+
+- Bước 3: Gán màu mới cho đỉnh đó.
+
+- Bước 4: Gom nhóm các đỉnh có cùng màu, in ra màn hình và trả về bảng mapping của đỉnh với màu của nó.
+
+### Thuật toán K-medoids
+
+Thuật toán K-medoids là một thuật toán gom nhóm dữ liệu dựa trên độ đo khoảng cách nào đó giữa trung tâm với các điểm dữ liệu con có cùng tính chất nào đó về cùng 1 nhóm. Thuật toán K-medoids là một phiên bản cải tiến của thuật toán K-means nhằm mục đích khắc phục hiện tượng nhiễu dữ liệu.
+
+Lí do cài đặt thuật toán K-medoids thay vì cài đặt thuật toán K-Means là vì:
+
+- Thuật toán K-Means rất nhạy cảm với nhiễu do việc lựa chọn trung tâm dựa trên tất cả các điểm dữ liệu trong cùng một nhóm. Và khi lựa chọn giá trị trung tâm thì có thể điểm dữ liệu được lựa chọn đó không tồn tại trong thực tế do chọn dựa trên giá trị trung bình của tất cả các điểm $\rightarrow$ khi điểm nhiễu nằm trong cùng nhóm có thể làm lệch giá trị trung tâm
+
+- Thuật toán K-Medoids nhằm mục đích khắc phục điểm yếu trên, thay vì chọn giá trị trung tâm để gom nhóm K-Medoids thực hiện chọn đối tượng trung tâm dựa trên điểm dữ liệu thực tế nằm trong tập dữ liệu, và yếu tố này giúp khắc phục phần nào sự ảnh hưởng của nhiễu lên việc chọn trung tâm để gom nhóm.
+
+$\Rightarrow$ Do đó lựa chọn thuật toán K-Medoids sử dụng trên dữ liệu đồ thị để các điểm trung tâm luôn là các điểm dữ liệu thực tế, ngoài ra khoảng cách đo lường để tối ưu thuật toán cũng dựa trên đường đi ngắn nhất giữa điểm trung tâm với các đỉnh con của nó.
+
+Cài đặt thuật toán K-medoids bằng python:
+
+- Bước 1: Khởi tạo K trung tâm bằng cách lấy ngẫu nhiên các đỉnh trong tập hợp các đỉnh.
+
+- Bước 2: Tính toán khoảng cách của từng điểm dữ liệu đến các trung tâm bằng cách sử dụng đường đi ngắn nhất từ đỉnh $v_i$ với đỉnh trung tâm $c_j$, và gán điểm dữ liệu về trung tâm gần với nó nhất, lưu lại tổng khoảng cách từ các đỉnh tới trung tâm $c_j$ mà đỉnh $v_i$ thuộc về.
+
+- Bước 3: Tính toán ra điểm trung tâm mới dựa trên các điểm dữ liệu nằm trong trung tâm đó.
+
+- Bước 4: Cập nhật các trung tâm mới dựa trên sự tỉ lệ thay đổi tổng khoảng cách từ các điểm dữ liệu con tới trung tâm của nó, nếu tỉ lệ thay đổi nhỏ hơn $\theta$ nào đó sẽ tính là đã hội tụ và không tiến hành cập nhật trung tâm. Ngoài ra, có bổ sung tham số ```max_iter``` để khống chế số lượng lần lặp để tìm và cập nhật các trung tâm mới nhằm tránh tình trạng lặp vô hạn khi hệ số $\theta$ đặt ra không đủ tốt để các trung tâm hội tụ.
 
 # Tài liệu tham khảo
 
-- Một số bài toán cơ bản trong phân tích dữ liệu. (n.d.). Thuc Nguyen Dinh.
+Mã nguồn cơ sở được lấy và phát triển từ đồng tác giả Trần Xuân Lộc - 22C11064 và Nguyễn Bảo Long - 22C11065 và được tiếp tục phát triển tại [link](https://github.com/stark4079/Lab_02_BFS_DFS).
+
+[1] Andreev, Konstantin; Räcke, Harald (2004). Balanced Graph Partitioning. Proceedings of the Sixteenth Annual ACM Symposium on Parallelism in Algorithms and Architectures. Barcelona, Spain. pp. 120–124.
+
+[2] Kernighan, B. W.; Lin, Shen (1970). "An efficient heuristic procedure for partitioning graphs". Bell System Technical Journal. 49: 291–307. doi:10.1002/j.1538-7305.1970.tb01770.x
+
+[3] Fiduccia; Mattheyses (1982). "A Linear-Time Heuristic for Improving Network Partitions". 19th Design Automation Conference: 175–181. doi:10.1109/DAC.1982.1585498. ISBN 0-89791-020-6. Retrieved 23 October 2013.
+
+[4] Một số bài toán cơ bản trong phân tích dữ liệu. (n.d.). Thuc Nguyen Dinh.

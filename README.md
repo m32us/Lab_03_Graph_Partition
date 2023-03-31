@@ -117,9 +117,18 @@ pip install datetime
         - `BFS(self, vertex_ith: int)`: module applying Breadth First Search Algorithm.
         
         - `DFS(self, vertex_ith: int)`: module applying Depth First Search Algorithm.
+        
         - `compute_adjacency_matrix(self, )`: computing adjacency matrix for graph.
+        
         - `degree_nodes(self, adjacency_matrix)`: computing the degree for each node.
+        
         - `compute_laplacian_matrix(self, )`: computing the the Laplacian matrix for graph.
+
+        - `get_edge_weight_bfs(self, v1, v2)`: computing the weigth of connections between vertex $v_1$ and $v_2$.
+
+        - `compute_total_weight(self)`: computing the total weight of graph. return divided by 2 if the graph is undirected.
+
+        - `initialize_label(self)`: initializing the `partition_label` for graph with a half of vertices assigned label `A` and the remainings are labeled with `B`.
 
 
 3. Support functions:
@@ -163,6 +172,29 @@ Spectral Bisection
 python main.py --number_nodes 20 --edge_prob 0.5 --algorithm sb
 ```
 
+Kerninghan-Lin (KL) algorithm optimized by connected components
+
+```
+python main.py --number_nodes 20 --edge_prob 0.5 --algorithm scc_kl
+```
+
+Recursive Bisection algorithm
+
+```
+python main.py --number_nodes 20 --edge_prob 0.5 --algorithm rpg
+```
+
+Graph Coloring algorithm
+
+```
+python main.py --number_nodes 20 --edge_prob 0.5 --algorithm clr
+```
+
+K-medois algorithm
+
+```
+python main.py --number_nodes 20 --edge_prob 0.5 --algorithm kmd
+```
 
 ## References
 
@@ -174,7 +206,7 @@ python main.py --number_nodes 20 --edge_prob 0.5 --algorithm sb
 
 ## About us
 
-Our project includes two contributors:
+Our project includes three contributors:
 - Tran Xuan Loc - 22C11064 - 22C11064@student.hcmus.edu.vn (For project 02 & 03, Thanks for his based coding)
 - Nguyen Bao Long - 22C11065 - 22C11065@student.hcmus.edu.vn (For project 02, Thanks for his based coding)
 - Le Nhut Nam - 22C11067 - 22C11065@student.hcmus.edu.vn (For project 03, Thanks for his based coding)

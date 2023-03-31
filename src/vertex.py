@@ -2,7 +2,7 @@ from support import *
 
 
 class Vertex:
-    def __init__(self, key):
+    def __init__(self, key, label=None):
         """
         Module for initializing Vertex class.
 
@@ -14,7 +14,7 @@ class Vertex:
 
         # Properties for graph partitioning
         self.level = 0
-        self.partition_label = None
+        self.partition_label = label
 
         self.external_cost = 0
         self.internal_cost = 0
@@ -35,9 +35,11 @@ class Vertex:
         :return: vertex id and its neighbors.
         """
         if self.partition_label is not None:
-            return str(self.id) + ' (PL: ' + str(self.partition_label) + ')' + " connectedTo: " + str([x.id for x in self.connectedTo])
+            return str(self.id) + ' (PL: ' + str(self.partition_label) + ')' + " connectedTo: " + str(
+                [x.id for x in self.connectedTo])
         else:
-            return str(self.id) + ' (lv ' + str(self.level) + ')' + " connectedTo: " + str([x.id for x in self.connectedTo])
+            return str(self.id) + ' (lv ' + str(self.level) + ')' + " connectedTo: " + str(
+                [x.id for x in self.connectedTo])
 
     def getConnections(self):
         """

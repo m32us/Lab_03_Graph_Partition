@@ -3,7 +3,7 @@ from random import random, randint
 from itertools import product, combinations
 
 from graph import *
-from algorithms import pa_bfs, pa_kl, pa_fm, pa_sb
+from algorithms import pa_bfs, pa_kl, pa_fm, pa_sb, recursive_bisection, greedyColoring, k_medois
 
 set_logger('logs/')
 
@@ -20,6 +20,7 @@ def generate_graph(n, p, directed=True,):
             g.addEdge(u, v, weight)
             if not directed:
                 g.addEdge(v, u, weight)
+    g.initialize_label()
     return g
 
 
@@ -43,7 +44,8 @@ if __name__ == '__main__':
         '--threshold', '-t', help='Threshold for BFS partitioning', type=int, default=3)
     parser.add_argument(
         '--algorithm', '-a', type=str, help='Algorithm for compute the partition of a graph.'
-        'bfs: Breadth First Search, kl: Kerninghan-Lin (KL) algorithm, fm: Fiduccia-Mattheyses (FM) algorithm, sb: Spectral Bisection', default='bfs')
+        'bfs: Breadth First Search, kl: Kerninghan-Lin (KL) algorithm, fm: Fiduccia-Mattheyses (FM) algorithm, '
+                                            'sb: Spectral Bisection', default='kmd')
 
     args = parser.parse_args()
     print(args)
@@ -59,5 +61,11 @@ if __name__ == '__main__':
         cutset_size, group_a, group_b = pa_fm(g)
     elif args.algorithm == 'sb':
         group_a, group_b = pa_sb(g)
+    elif args.algorithm == 'rpg':
+        group_a, group_b = recursive_bisection(g)
+    elif args.algorithm == 'clr':
+        color_map = greedyColoring(g)
+    elif args.algorithm == 'kmd':
+        centroids, groups = k_medois(g)
     else:
         logging.warning('Algorithm not supported')
