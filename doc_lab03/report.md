@@ -340,6 +340,10 @@ Cài đặt thuật toán bằng Python
 
 ### Thuật toán Fiduccia-Mattheyses Partitioning
 
+Fiduccia-Mattheyeses algorithm là một thuật toán phân hoạch dựa trên heuristic mà tổng quát khái niệm hoán vị đỉnh mà được giới thiệu trong thuật toán KL. Thuật toán FL được cài đặt để phân hoạch siêu đồ thị (hypergraph), thay vì hoán vị đỉnh như KL, nó hoán vị một đỉnh đơn trong một lần duyệt.
+
+Bản chất của thuật toán FL giống với thuật toán KL, định nghĩa độ lợi (gain) cho mỗi đỉnh trong đồ thị (siêu đồ thị), chọn một nút theo một số tiêu chí, loại bỏ nó trong phân hoạch hiện tại, khóa đỉnh đó, cập nhật tất cả các độ lợi của các đỉnh chưa bị khóa, và lặp lại cho đến khi chúng ta đạt được tối ưu cục bộ.
+
 ### Thuật toán Spectral Bisection
 
 Lý thuyết spectral bisection được phát triển vào năm 1970 bởi Fiedler. Nó dựa trên tính toán vector trị riêng của ma trận Laplacian matrix của đồ thị. Với một đồ thị $G$, chúng ta định nghĩa ma trận Laplacian của nó $L(G)$ như sau:

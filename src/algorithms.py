@@ -1,6 +1,7 @@
 import logging
 import numpy as np
 import random
+
 from vertex import *
 from graph import *
 
@@ -276,11 +277,15 @@ def pa_fm(graph):
 
         # Get the pair of vertices with the maximum gain and swap their partition labels.
         pair = gains[0][0]
-        group_a.remove(pair[0])
-        group_b.remove(pair[1])
 
-        graph.vertList[pair[0]].partition_label = "B"
-        graph.vertList[pair[1]].partition_label = "A"
+
+        # Random locked vertex
+        locked_vertex = random.randint(0, 1)
+
+        if locked_vertex == 0:
+             graph.vertList[pair[0]].partition_label = "B"
+        else:
+            graph.vertList[pair[1]].partition_label = "A"
 
         # Update the D values of the vertices in groups A and B.
         for x in group_a:
